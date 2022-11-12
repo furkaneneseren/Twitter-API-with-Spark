@@ -16,10 +16,15 @@ access_token = os.getenv('access_token')
 access_secret = os.getenv('access_token_secret')
 
 
-class TweetsListener(Stream):
+class MyStreamListener(tweepy.StreamingClient):
+    
+  def on_connect(self):
+        print("Connected")
 
-  def __init__(self, csocket):
-      self.client_socket = csocket
+  def on_tweet(self, tweet):
+    # Displaying tweet in console
+    if tweet.referenced_tweets == None:
+        print(tweet.text)
 
   def on_data(self, data):
       try:
@@ -37,11 +42,23 @@ class TweetsListener(Stream):
 
 
 def sendData(c_socket):
-  auth = OAuthHandler(consumer_key = os.getenv('api_key'), consumer_secret_key = os.getenv('api_key_secret'))
-  auth.set_access_token(access_token = os.getenv('access_token'), access_secret = os.getenv('access_token_secret'))
+    client = tweepy.Client(os.getenv('bearer_token'), os.getenv('api_key'), os.getenv('api_key_secret'), os.getenv('access_token'), os.getenv('access_token_secret'))
+    auth = tweepy.OAuth1UserHandler(os.getenv('api_key'), os.getenv('api_key_secret'), os.getenv('access_token'), os.getenv('access_token_secret'))
+    api = tweepy.API(auth)
 
-  twitter_stream = Stream(auth, TweetsListener(c_socket))
-  twitter_stream.filter(track=['ether'])
+
+    search_terms =  ["python", "programming", "coding"]
+    stream = MyStreamListener(os.getenv('bearer_token'))
+
+    for term in search_terms:
+        stream.add_rules(tweepy.StreamRule(term))
+
+   
+    stream.filter(tweet_fields=["referenced_tweets"])
+
+    """myStreamListener = MyStreamListener()
+    myStream = tweepy.Stream(auth = api.auth, listener=myStreamListener)
+    myStream.filter(track=['ether'])"""
 
 
 if __name__ == "__main__":
