@@ -38,7 +38,6 @@ class MyStreamListener(tweepy.StreamingClient):
         msg = tweet.data
         print(msg['text'].encode('utf-8'))
         c.send((str(msg['text']) + "\n").encode('utf-8'))
-        time.sleep(4)
         return True
     except BaseException as e:
           print("Error on_data: %s" % str(e))
